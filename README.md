@@ -1,2 +1,3 @@
-# ligthbeam
+# lightbeam
+
 Raytracer in Scala
