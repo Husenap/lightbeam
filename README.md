@@ -1,0 +1,2 @@
+# ligthbeam
+Raytracer in Scala
