@@ -1,34 +1,23 @@
 package lightbeam.math
 
-/** 3-dimensional vector class that supports both mutable and immutable operations.
+/** 3-dimensional vector class that supports immutable operations.
  *  ### Example Usage
  *  ```
- *  val v1 = Vec3(1, 2, 3)
- *  val v2 = Vec3.One
- *  v1 += v2
- *
- *  val forward = Vec3.Right cross Vec3.Up
+ *  val v1 = Vec3.Right
+ *  val v2 = Vec3.Up
+ *  val forward = v1 cross v2
  *  ```
  */
 case class Vec3 private (
-    var x: Double,
-    var y: Double,
-    var z: Double
+    val x: Double,
+    val y: Double,
+    val z: Double
 ):
   /** Immutable component-wise commutative addition between two vectors. */
   infix def +(other: Vec3): Vec3 = Vec3(x + other.x, y + other.y, z + other.z)
 
   /** Immutable addition between a vector and a scalar. */
   infix def +(scalar: Double): Vec3 = Vec3(x + scalar, y + scalar, z + scalar)
-
-  /** Mutable component-wise commutative addition between a vector and a scalar. */
-  def +=(other: Vec3): Unit =
-    x += other.x
-    y += other.y
-    z += other.z
-
-  /** Mutable addition between a vector and a scalar. */
-  def +=(scalar: Double): Unit = this += Vec3(scalar, scalar, scalar)
 
   /** Immutable component-wise subtraction between two vectors. */
   infix def -(other: Vec3): Vec3 = Vec3(x - other.x, y - other.y, z - other.z)
@@ -37,34 +26,13 @@ case class Vec3 private (
   infix def -(scalar: Double): Vec3 = Vec3(x - scalar, y - scalar, z - scalar)
 
   /** Immutable unary negation of a vector. */
-  def unary_- : Vec3 = Vec3(-x, -y, -z)
-
-  /** Mutable component-wise subtraction between two vectors. */
-  def -=(other: Vec3): Unit =
-    x -= other.x
-    y -= other.y
-    z -= other.z
-
-  /** Mutable subtraction between a vector and a scalar. */
-  def -=(scalar: Double): Unit = this -= Vec3(scalar, scalar, scalar)
+  lazy val unary_- : Vec3 = Vec3(-x, -y, -z)
 
   /** Immutable multiplication between a vector and a scalar. */
   infix def *(scalar: Double): Vec3 = Vec3(x * scalar, y * scalar, z * scalar)
 
-  /** Mutable multiplication between a vector and a scalar. */
-  def *=(scalar: Double): Unit =
-    x *= scalar
-    y *= scalar
-    z *= scalar
-
   /** Immutable division between a vector and a scalar. */
   infix def /(scalar: Double): Vec3 = Vec3(x / scalar, y / scalar, z / scalar)
-
-  /** Mutable division between a vector and a scalar. */
-  def /=(scalar: Double): Unit =
-    x /= scalar
-    y /= scalar
-    z /= scalar
 
   /** Calculates the dot product of two vectors. */
   infix def dot(other: Vec3): Double =
@@ -78,19 +46,34 @@ case class Vec3 private (
   )
 
   /** Calculates the squared magnitude of a vector. */
-  def magnitudeSquared = dot(this)
+  lazy val magnitudeSquared = dot(this)
 
   /** Calculates the magnitude of a vector. */
-  def magnitude = math.sqrt(magnitudeSquared)
+  lazy val magnitude = math.sqrt(magnitudeSquared)
 
   /** Alias for [[magnitude]]. */
   def length = magnitude
 
-  /** Normalize a vector in-place. */
-  def normalize(): Unit = this /= length
-
   /** Immutable normalization of a vector. */
-  def normalized: Vec3 = this / length
+  lazy val normalized: Vec3 = this / length
+
+  /** Reflect a vector around a normal.
+   *  @param normal Normal to reflect this vector around.
+   *  @return A new vector that is reflected.
+   */
+  infix def reflect(normal: Vec3): Vec3 = this - 2 * (this dot normal) * normal
+
+  /** Refract a vector through a surface.
+   *  @param normal Normal of the surface.
+   *  @param ior Index Of Refraction.
+   *  @return A new vector that is refracted through the surface.
+   */
+  def refract(normal: Vec3, ior: Double): Vec3 =
+    val cosTheta       = (-this) dot normal
+    val rPerpendicular = ior * (this + cosTheta * normal)
+    val rParallel      =
+      -math.sqrt(math.abs(1.0 - rPerpendicular.magnitudeSquared)) * normal
+    rPerpendicular + rParallel
 
 case object Vec3:
   /** Constructs a new vector.
@@ -106,19 +89,40 @@ case object Vec3:
   def apply(scalar: Double): Vec3 = new Vec3(scalar, scalar, scalar)
 
   /** Default zero vector, defined as (0,0,0). */
-  def Zero: Vec3 = apply(0.0)
+  final val Zero: Vec3 = apply(0.0)
 
   /** Default one vector, defined as (1,1,1). */
-  def One: Vec3 = apply(1.0)
+  final val One: Vec3 = apply(1.0)
 
   /** Default right vector, pointing in the positive x-axis. */
-  def Right: Vec3 = apply(1.0, 0.0, 0.0)
+  final val Right: Vec3 = apply(1.0, 0.0, 0.0)
 
   /** Default up vector, pointing in the positive y-axis. */
-  def Up: Vec3 = apply(0.0, 1.0, 0.0)
+  final val Up: Vec3 = apply(0.0, 1.0, 0.0)
 
   /** Default forward vector, pointing in the positive z-axis. */
-  def Forward: Vec3 = apply(0.0, 0.0, 1.0)
+  final val Forward: Vec3 = apply(0.0, 0.0, 1.0)
+
+  /** Generates a random direction vector. */
+  def randomDirection: Vec3 =
+    val a = util.Random.nextDouble * 2.0 * math.Pi
+    val z = util.Random.nextDouble * 2.0 - 1.0
+    val r = math.sqrt(1.0 - z * z)
+    Vec3(r * math.cos(a), r * math.sin(a), z)
+
+  /** Generates a uniformly distributed random vector in the unit disc. */
+  def randomInUnitDisc: Vec3 =
+    val a = util.Random.nextDouble
+    val r = math.pow(util.Random.nextDouble, 1.0 / 3.0)
+    Vec3(r * math.cos(a), r * math.sin(a), 0.0)
+
+  /** Generates a random color with values [0,1). */
+  def randomColor: Vec3 =
+    Vec3(
+      util.Random.nextDouble,
+      util.Random.nextDouble,
+      util.Random.nextDouble
+    )
 
   extension (scalar: Double)
     /** Extension method that allows additions with vectors on the right-hand side.
