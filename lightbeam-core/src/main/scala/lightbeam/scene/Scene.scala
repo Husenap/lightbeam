@@ -1,3 +1,5 @@
-package lightbeam.raytracing
+package lightbeam.scene
 
-class Scene
+import lightbeam.scene.HittableList
+
+class Scene(val world: HittableList, val lightSources: HittableList)

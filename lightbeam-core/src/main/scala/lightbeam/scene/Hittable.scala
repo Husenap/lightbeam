@@ -1,13 +1,12 @@
 package lightbeam.scene
 
-import scala.compiletime.ops.boolean
-import lightbeam.math.Vec3
 import lightbeam.math.Ray
+import lightbeam.math.Vec3
 
 case class HitRecord private (
     val point: Vec3,
     var normal: Vec3,
-    val material: Int,
+    val material: Material,
     val t: Double,
     var frontFace: Boolean
 )
@@ -17,7 +16,7 @@ case object HitRecord:
       point: Vec3,
       ray: Ray,
       outwardNormal: Vec3,
-      material: Int,
+      material: Material,
       t: Double
   ): HitRecord =
     val frontFace = (ray.direction dot outwardNormal) < 0.0

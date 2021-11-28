@@ -3,7 +3,7 @@ package lightbeam.scene
 import lightbeam.math.Ray
 import lightbeam.math.Vec3
 
-class Sphere(val center: Vec3, val radius: Double, material: Int)
+class Sphere(val center: Vec3, val radius: Double, material: Material)
     extends Hittable:
 
   override def hit(ray: Ray, tMin: Double, tMax: Double): Option[HitRecord] =

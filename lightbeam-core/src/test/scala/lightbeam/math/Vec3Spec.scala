@@ -1,6 +1,7 @@
 package lightbeam.math
 
 import org.scalatest.*
+
 import wordspec.*
 import matchers.*
 

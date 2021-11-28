@@ -1,6 +1,7 @@
 package lightbeam.scene
 
 import lightbeam.math.Ray
+
 import scala.collection.mutable.ArrayBuffer
 
 class HittableList extends Hittable:

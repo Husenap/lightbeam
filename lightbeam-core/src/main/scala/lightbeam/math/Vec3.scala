@@ -13,6 +13,10 @@ case class Vec3 private (
     val y: Double,
     val z: Double
 ):
+  def r = x
+  def g = y
+  def b = z
+
   /** Immutable component-wise commutative addition between two vectors. */
   infix def +(other: Vec3): Vec3 = Vec3(x + other.x, y + other.y, z + other.z)
 
@@ -27,6 +31,9 @@ case class Vec3 private (
 
   /** Immutable unary negation of a vector. */
   lazy val unary_- : Vec3 = Vec3(-x, -y, -z)
+
+  /** Immutable component-wise multiplication between two vectors. */
+  infix def *(other: Vec3): Vec3 = Vec3(x * other.x, y * other.y, z * other.z)
 
   /** Immutable multiplication between a vector and a scalar. */
   infix def *(scalar: Double): Vec3 = Vec3(x * scalar, y * scalar, z * scalar)
@@ -123,6 +130,20 @@ case object Vec3:
       util.Random.nextDouble,
       util.Random.nextDouble
     )
+
+  def mix(a: Vec3, b: Vec3, t: Double): Vec3 = a * (1.0 - t) + b * t
+
+  def clamp(v: Vec3, min: Double, max: Double): Vec3 = Vec3(
+    math.min(math.max(v.x, min), max),
+    math.min(math.max(v.y, min), max),
+    math.min(math.max(v.z, min), max)
+  )
+
+  def pow(v: Vec3, exponent: Double): Vec3 = Vec3(
+    math.pow(v.x, exponent),
+    math.pow(v.y, exponent),
+    math.pow(v.z, exponent)
+  )
 
   extension (scalar: Double)
     /** Extension method that allows additions with vectors on the right-hand side.
